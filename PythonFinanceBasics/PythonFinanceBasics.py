@@ -2,6 +2,7 @@
 import pandas as pd
 import pandas_datareader as pdr
 import datetime
+import matplotlib.pyplot as plt
 
 # Data import
 aapl = pdr.get_data_yahoo('AAPL',
@@ -16,3 +17,7 @@ df_aapl = pd.read_csv('data/aapl_ohlc.csv',
                       header=0,
                       index_col='Date',
                       parse_dates=True)
+
+# Visualization
+aapl['Close'].plot(grid=True)
+plt.show()
