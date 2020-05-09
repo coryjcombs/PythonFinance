@@ -1,13 +1,29 @@
 # Packages
+import numpy as np
 import pandas as pd
 import pandas_datareader as pdr
-import datetime
 import matplotlib.pyplot as plt
+from pandas.plotting import scatter_matrix
+from pandas.core import datetools
+import datetime
+import statsmodels.api as sm
+
+##########
+# BASICS
+##########
 
 # Data import
 aapl = pdr.get_data_yahoo('AAPL',
                           start=datetime.datetime(2006, 10, 1),
                           end=datetime.datetime(2012, 1, 1))
+
+# Add diff column to df
+aapl['diff'] = aapl.Open - aapl.Close
+# del aapl['diff'] # debug: uncomment to remove diff column
+
+# Visualization check
+aapl['Close'].plot(grid=True)
+plt.show()
 
 # Data storage (temp)
 aapl.to_csv('data/aapl_ohlc.csv')
@@ -18,6 +34,112 @@ df_aapl = pd.read_csv('data/aapl_ohlc.csv',
                       index_col='Date',
                       parse_dates=True)
 
-# Visualization
-aapl['Close'].plot(grid=True)
+# Daily change
+
+## Setup
+daily_close = aapl[['Adj Close']]
+daily_pct_change = daily_close.pct_change()
+
+## NA value handling
+daily_pct_change.fillna(0, inplace=True)
+
+## Inspect pct change
+print(daily_pct_change)
+
+## Daily log returns
+daily_log_returns = np.log(daily_close.pct_change()+1)
+
+## Inspect log pct change
+print(daily_log_returns)
+
+# Monthly and quarterly changes
+
+## Resample to business months (BM)
+monthly = aapl.resample("BM").apply(lambda x: x[-1])
+
+## Monthly pct change
+monthly_pct_change = monthly.pct_change()
+
+## Resample to quarterly using mean value per quarter
+quarterly = aapl.resample("4M").mean()
+
+## Quarterly pct change
+quarterly_pct_change = quarterly.pct_change()
+
+# Plot daily_pct_change
+daily_pct_change.hist(bins=50)
 plt.show()
+
+# Show summary statistics
+print(daily_pct_change.describe())
+
+# Cumulative daily rate of return
+cum_daily_return = (1 + daily_pct_change).cumprod()
+print(cum_daily_return)
+
+# Plot cum_daily_return
+cum_daily_return.plot(figsize=(12,8))
+plt.show()
+
+# Cumulative monthly rate of return
+cum_monthly_return = cum_daily_return.resample("M").mean()
+print(cum_monthly_return)
+
+##########
+# PORTFOLIO
+##########
+
+# Ticker function setup
+def get(tickers, startdate, enddate):
+    def data(ticker):
+        return(pdr.get_data_yahoo(ticker, start=startdate, end=enddate))
+    datas = map (data, tickers)
+    return(pd.concat(datas, keys=tickers, names=['Ticker', 'Date']))
+
+# Ticker selection
+tickers = ['AAPL', 'MSFT', 'IBM', 'GOOG']
+
+# Get ticker data
+all_data = get(tickers, datetime.datetime(2006, 10, 1), datetime.datetime(2012, 1, 1))
+
+# Transform and refocus to Adj Close
+daily_close_px = all_data[['Adj Close']].reset_index().pivot('Date', 'Ticker', 'Adj Close')
+
+# Calculate daily_pct_change
+daily_pct_change = daily_close_px.pct_change()
+
+# Plot distributions
+daily_pct_change.hist(bins=50, sharex=True, figsize=(12,8))
+plt.show()
+
+# Scatter matrix
+scatter_matrix(daily_pct_change, diagonal='kde', alpha=0.1, figsize=(12,12))
+plt.show()
+
+# Moving average of adjusted close
+adj_close_px = aapl['Adj Close']
+moving_avg_adj_close = adj_close_px.rolling(window=40).mean()
+print(moving_avg_adj_close)
+
+# Volatility
+min_periods = 75
+vol = daily_pct_change.rolling(min_periods).std() * np.sqrt(min_periods)
+vol.plot(figsize=(10,8))
+plt.show()
+
+# Ordinary least-squares regression
+
+## Select out Adj Close
+all_adj_close = all_data[['Adj Close']]
+
+## Calculate returns
+all_returns = np.log(all_adj_close / all_adj_close.shift(1))
+
+# Isolate AAPL returns
+aapl_returns = all.returns.iloc[all_returns.index.get_level_values('Ticker') == 'AAPL']
+aapl_returns.index = aapl.returns.index.droplevel('Ticker')
+
+# Isolate MSFT returns
+msft_returns = all.returns.iloc[all_returns.index.get_level_values('Ticker') == 'MSFT']
+msrt_returns.index = msft.returns.index.droplevel('Ticker')
+
