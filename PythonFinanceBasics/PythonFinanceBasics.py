@@ -203,9 +203,9 @@ ax1.plot(signals.loc[signals.positions == -1.0],
          'v', markersize=10, color='k')
 plt.show()
 
-#############
-# BACKTESTING
-#############
+#####################
+# BACKTESTING: PANDAS
+#####################
 
 # Initial capital
 initial_capital = float(100000.0)
@@ -249,3 +249,7 @@ ax1.plot(portfolio.loc[signals.positions == -1.0].index,
          portfolio.total[signals.postions == -1.0],
          'v', markersize=10, color='k')
 plt.show()
+
+######################
+# BACKTESTING: ZIPLINE
+######################
