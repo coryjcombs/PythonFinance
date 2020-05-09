@@ -192,3 +192,19 @@ signals['signal'][short_window:] = np.where(signals['short_mavg'][short_window:]
 # Generate trade orders
 signals['positions'] = signals['signal'].diff()
 
+# Plot signals
+fig = plt.figure()
+ax1 = fig.add_subplot(111, ylabel='Price in $')
+aapl['Close'].plot(ax=ax1, color='r', lw=2.)
+signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.)
+ax1.plot(signals.loc[signals.positions == 1.0],
+         '^', markersize=10, color='m')
+ax1.plot(signals.loc[signals.positions == -1.0],
+         'v', markersize=10, color='k')
+plt.show()
+
+#############
+# BACKTESTING
+#############
+
+# 
