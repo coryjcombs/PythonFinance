@@ -144,7 +144,7 @@ msft_returns = all.returns.iloc[all_returns.index.get_level_values('Ticker') == 
 msrt_returns.index = msft.returns.index.droplevel('Ticker')
 
 # Combine AAPL and MSFT returns in new dataframe
-return_data = pd.concat([aapl_returns, msft_returns], axis=1)[1:]
+return_data = pd.concat([aapl_returns, msft_returns], axis=1)[1:] # Selection '[1:]' avoids NaN value
 return_data.columns = ['AAPL', 'MSFT']
 
 # Add constant
@@ -154,4 +154,17 @@ X = sm.add_contant(return_data['AAPL'])
 model = sm.OLS(return_data['MSFT'], X).fit()
 print(model.summary())
 
-#
+# Plot ordinary least squares
+plt.plot(return_data['AAPL'], return_data['MSFT'], 'r.')
+ax = plt.axis()
+x = np.linspace(ax[0], ax[1] + 0.01)
+plt.plot(x, model.params[0] + model.params[1] * x, 'b', lw=2)
+plt.grid(True)
+plt.xlabel('AAPL Returns')
+plt.ylabel('MSFT Returns')
+plt.show()
+
+# Plot rolling correlation
+return_data['MSFT'].rolling(window=252).corr(return_data['AAPL']).plot()
+plt.show()
+
