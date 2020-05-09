@@ -136,19 +136,19 @@ all_adj_close = all_data[['Adj Close']]
 all_returns = np.log(all_adj_close / all_adj_close.shift(1))
 
 # Isolate AAPL returns
-aapl_returns = all.returns.iloc[all_returns.index.get_level_values('Ticker') == 'AAPL']
-aapl_returns.index = aapl.returns.index.droplevel('Ticker')
+aapl_returns = all_returns.iloc[all_returns.index.get_level_values('Ticker') == 'AAPL']
+aapl_returns.index = aapl_returns.index.droplevel('Ticker')
 
 # Isolate MSFT returns
-msft_returns = all.returns.iloc[all_returns.index.get_level_values('Ticker') == 'MSFT']
-msrt_returns.index = msft.returns.index.droplevel('Ticker')
+msft_returns = all_returns.iloc[all_returns.index.get_level_values('Ticker') == 'MSFT']
+msft_returns.index = msft_returns.index.droplevel('Ticker')
 
 # Combine AAPL and MSFT returns in new dataframe
 return_data = pd.concat([aapl_returns, msft_returns], axis=1)[1:] # Selection '[1:]' avoids NaN value
 return_data.columns = ['AAPL', 'MSFT']
 
 # Add constant
-X = sm.add_contant(return_data['AAPL'])
+X = sm.add_constant(return_data['AAPL'])
 
 # Construct model
 model = sm.OLS(return_data['MSFT'], X).fit()
@@ -243,13 +243,14 @@ ax1 = fig.add_subplot(111, ylabel='Portfolio Value in $')
 ## Plot equity curve
 portfolio['total'].plot(ax=ax1, lw=2)
 ax1.plot(portfolio.loc[signals.positions == 1.0].index,
-         portfolio.total[signals.postions == 1.0],
+         portfolio.total[signals.positions == 1.0],
          '^', markersize=10, color='m')
 ax1.plot(portfolio.loc[signals.positions == -1.0].index,
-         portfolio.total[signals.postions == -1.0],
+         portfolio.total[signals.positions == -1.0],
          'v', markersize=10, color='k')
 plt.show()
 
 ######################
 # BACKTESTING: ZIPLINE
 ######################
+
