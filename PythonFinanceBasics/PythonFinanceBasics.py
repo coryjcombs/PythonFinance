@@ -207,4 +207,29 @@ plt.show()
 # BACKTESTING
 #############
 
-# 
+# Initial capital
+initial_capital = float(100000.0)
+
+# Positions dataframe initialization
+positions = pd.DataFrame(index=signals.index).fillna(0.0)
+
+# Portfolio initialization
+portfolio = positions.multiply(aapl['Adj Close'], axis=0)
+
+# Store difference in shares owned
+pos_diff = positions.diff()
+
+# Add holdings to portfolio
+portfolio['holdings'] = (positions.multiply(aapl['Adj Close'], axis=0)).sum(axis=1).cumsum()
+
+# Add cash to portfolio
+portfolio['cash'] = initial_capital - (pos_diff.multiply(aapl['Adj Close'], axis=0)).sum(axis=1).cumsum()
+
+# Add total to portfolio
+portfolio['total'] = portfolio['cash'] + portfolio['holdings']
+
+# Add returns to portfolio
+portfolio['returns'] = portfolio['total'].pct_change()
+
+# View portfolio head
+print(portfolio.head())
