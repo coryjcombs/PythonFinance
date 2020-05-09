@@ -233,3 +233,19 @@ portfolio['returns'] = portfolio['total'].pct_change()
 
 # View portfolio head
 print(portfolio.head())
+
+# Visualize portfolio
+
+## Create figure
+fig = plt.figure()
+ax1 = fig.add_subplot(111, ylabel='Portfolio Value in $')
+
+## Plot equity curve
+portfolio['total'].plot(ax=ax1, lw=2)
+ax1.plot(portfolio.loc[signals.positions == 1.0].index,
+         portfolio.total[signals.postions == 1.0],
+         '^', markersize=10, color='m')
+ax1.plot(portfolio.loc[signals.positions == -1.0].index,
+         portfolio.total[signals.postions == -1.0],
+         'v', markersize=10, color='k')
+plt.show()
