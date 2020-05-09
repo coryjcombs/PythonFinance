@@ -143,3 +143,14 @@ aapl_returns.index = aapl.returns.index.droplevel('Ticker')
 msft_returns = all.returns.iloc[all_returns.index.get_level_values('Ticker') == 'MSFT']
 msrt_returns.index = msft.returns.index.droplevel('Ticker')
 
+# Combine AAPL and MSFT returns in new dataframe
+return_data = pd.concat([aapl_returns, msft_returns], axis=1)[1:]
+return_data.columns = ['AAPL', 'MSFT']
+
+# Add constant
+X = sm.add_contant(return_data['AAPL'])
+
+# Construct model
+model = sm.OLS(return_data['MSFT'], X).fit()
+print(model.summary())
+
