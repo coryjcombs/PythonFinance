@@ -8,9 +8,9 @@ from pandas.core import datetools
 import datetime
 import statsmodels.api as sm
 
-##########
+########
 # BASICS
-##########
+########
 
 # Data import
 aapl = pdr.get_data_yahoo('AAPL',
@@ -85,9 +85,9 @@ plt.show()
 cum_monthly_return = cum_daily_return.resample("M").mean()
 print(cum_monthly_return)
 
-##########
+###########
 # PORTFOLIO
-##########
+###########
 
 # Ticker function setup
 def get(tickers, startdate, enddate):
@@ -167,4 +167,28 @@ plt.show()
 # Plot rolling correlation
 return_data['MSFT'].rolling(window=252).corr(return_data['AAPL']).plot()
 plt.show()
+
+##########################
+# MOVING AVERAGE CROSSOVER
+##########################
+
+# Windows
+short_window = 40
+long_window = 100
+
+# Dataframe initialization
+signals = pd.DataFrame(index = aapl.index)
+signals['signal'] = 0.0
+
+# Short moving simple average
+signals['short_mavg'] = aapl['Close'].rolling(window=short_window, min_periods=1, center=False).mean()
+
+# Long moving simple average
+signals['long_mavg'] = aapl['Close'].rolling(window=long_window, min_periods=1, center=False).mean()
+
+# Create signals
+signals['signal'][short_window:] = np.where(signals['short_mavg'][short_window:] > signals['long_mavg'][short_window:], 1.0, 0.0)
+
+# Generate trade orders
+signals['positions'] = signals['signal'].diff()
 
