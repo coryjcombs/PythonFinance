@@ -249,8 +249,3 @@ ax1.plot(portfolio.loc[signals.positions == -1.0].index,
          portfolio.total[signals.positions == -1.0],
          'v', markersize=10, color='k')
 plt.show()
-
-######################
-# BACKTESTING: ZIPLINE
-######################
-
