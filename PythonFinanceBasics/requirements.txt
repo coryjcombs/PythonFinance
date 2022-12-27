@@ -35,7 +35,7 @@ pytz==2020.1
 requests==2.20.1
 requests-file==1.4.3
 scipy==1.1.0
-setuptools==40.2.0
+setuptools==65.5.1
 six==1.11.0
 sortedcontainers==2.1.0
 SQLAlchemy==1.2.11
